@@ -1,0 +1,44 @@
+services:
+  ollama:
+    image: ollama/ollama
+    environment:
+      OLLAMA_KEEP_ALIVE: ${OLLAMA_KEEP_ALIVE:-10m}
+    volumes:
+      - ollama_data:/root/.ollama
+    restart: unless-stopped
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: insightforge
+      POSTGRES_USER: insightforge
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-insightforge-local}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U insightforge -d insightforge"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
+  insightforge:
+    build: .
+    ports:
+      - "127.0.0.1:${INSIGHTFORGE_PORT:-8001}:8000"
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      INSIGHTFORGE_DATA_DIR: /app/data
+      DATABASE_URL: postgresql://insightforge:${POSTGRES_PASSWORD:-insightforge-local}@db:5432/insightforge
+    volumes:
+      - insightforge_data:/app/data
+    depends_on:
+      db:
+        condition: service_healthy
+      ollama:
+        condition: service_started
+    restart: unless-stopped
+volumes:
+  insightforge_data:
+  postgres_data:
+  ollama_data:

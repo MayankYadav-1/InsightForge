@@ -1,0 +1,26 @@
+# Python virtual environments
+.venv/
+venv/
+
+# Environment variables and secrets
+.env
+.env.*
+!.env.example
+
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Pytest cache and temporary test folders
+.pytest_cache/
+.pytest-ai-*/
+.pytest-finalcheck/
+.pytest-runtime/
+.pytest-tmp/
+
+# Data files
+data/*
+!data/.gitkeep
+
+# System files
+.DS_Store

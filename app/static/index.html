@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#f6f7f5"><title>InsightForge — Business decision radar</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <script src="/vendor/plotly.min.js"></script>
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+<aside class="sidebar">
+  <a class="brand" href="/"><span class="brand-mark">✳</span><span>insight<span class="brand-light">forge</span></span></a>
+  <div class="side-label">WORKSPACE</div>
+  <button class="nav-item active" data-view="overview"><span>◫</span> Overview</button>
+  <button class="nav-item" data-view="data"><span>▦</span> Data explorer</button>
+  <button class="nav-item" data-view="analysis"><span>⌁</span> Analysis</button>
+  <button class="nav-item" data-view="assistant"><span>✧</span> AI assistant <i class="ai-dot"></i></button>
+  <div class="sidebar-bottom"><div class="side-label">YOUR DATA</div><div id="dataset-list" class="dataset-list"><p class="muted small">No datasets yet</p></div><div class="sidebar-note"><span class="lock">⌑</span><div><b>Private by default</b><small>Your data stays on this machine.</small></div></div><div class="version">INSIGHTFORGE <span>v1.0</span></div></div>
+</aside>
+<main class="main">
+  <header class="topbar"><div class="breadcrumbs"><span>Workspace</span><b>/</b><strong id="crumb">Overview</strong></div><div class="top-actions"><span class="status"><i></i> Local workspace</span><button id="upload-top" class="button button-dark">＋ Upload data</button></div></header>
+  <section id="empty" class="empty-state">
+    <div class="hero-icon">✳</div><div class="eyebrow">SMALL BUSINESS PERFORMANCE RADAR</div><h1>See what changed.<br>Know where to look.</h1><p>Compare sales periods, find which products or regions moved your numbers, and get an evidence-backed next check—from the CSV you already export.</p>
+    <label class="dropzone" id="dropzone"><input type="file" id="file-input" accept=".csv,text/csv"><span class="upload-icon">↑</span><b>Drop your CSV here or <u>browse files</u></b><small>CSV format · Up to 25 MB</small></label>
+    <button id="demo-btn" class="demo-link">Explore a sample revenue problem →</button>
+    <div id="upload-error" class="error hidden"></div><div class="privacy-line">⌑ &nbsp;Your file stays local and private.</div>
+    <div class="feature-row"><div><span>01</span><b>Explore</b><small>Understand your data</small></div><div><span>02</span><b>Analyze</b><small>Find meaningful patterns</small></div><div><span>03</span><b>Ask</b><small>Get answers in plain language</small></div></div>
+  </section>
+  <section id="dashboard" class="dashboard hidden">
+    <div class="welcome-row"><div><div class="eyebrow">YOUR WORKSPACE</div><h1 id="dataset-name">Dataset overview</h1><p class="subtitle" id="dataset-subtitle">Get to know your data at a glance.</p></div><div class="welcome-actions"><button id="download-btn" class="button button-light">↓ Export CSV</button><button id="upload-again" class="button button-dark">＋ New dataset</button></div></div>
+    <div class="metric-grid" id="metrics"></div>
+    <div class="content-grid">
+      <article class="card wide decision-card"><div class="card-head"><div><span class="card-kicker">DECISION RADAR</span><h2>What changed, and where should I look?</h2></div><span class="spark">↗</span></div><p class="card-copy">Compare the latest period with the one before it. See which segment explains the movement, then get a concrete next check.</p><div class="decision-controls"><label>Date column<select id="decision-date"></select></label><label>Business metric<select id="decision-metric"></select></label><label>Break down by<select id="decision-segment"></select></label><label>Compare<select id="decision-period"><option value="auto">Auto period</option><option value="day">Day</option><option value="week">Week</option><option value="month">Month</option></select></label><label>Measure<select id="decision-aggregation"><option value="sum">Total</option><option value="mean">Average</option><option value="count">Count</option></select></label><button id="decision-btn" class="button button-dark">Build decision brief →</button></div><div id="decision-result" class="decision-result"><div class="decision-empty">Choose your date, metric, and segment columns to get an evidence-backed comparison.</div></div></article>
+      <article class="card wide"><div class="card-head"><div><span class="card-kicker">DATA HEALTH</span><h2>Column profile</h2></div><button class="icon-btn" title="Column profile">···</button></div><div class="table-wrap"><table><thead><tr><th>Column</th><th>Type</th><th>Missing</th><th>Unique</th><th>Range / sample</th></tr></thead><tbody id="profile-body"></tbody></table></div></article>
+      <article class="card"><div class="card-head"><div><span class="card-kicker">QUICK ACTION</span><h2>Clean your data</h2></div><span class="spark">✧</span></div><p class="card-copy">Remove duplicate rows and fill missing values to prepare a clean working copy.</p><label class="select-label">Fill missing values with<select id="impute"><option value="none">Leave them as-is</option><option value="median">Median (numeric) / mode</option><option value="mean">Mean (numeric) / mode</option><option value="mode">Most common value</option></select></label><button id="clean-btn" class="button button-outline full">Clean dataset →</button><div id="clean-result" class="clean-result hidden"></div></article>
+      <article class="card wide"><div class="card-head"><div><span class="card-kicker">VISUAL EXPLORATION</span><h2>Build a chart</h2></div><div class="chart-controls"><select id="chart-kind"><option value="histogram">Distribution</option><option value="bar">Top values</option><option value="scatter">Relationship</option><option value="box">Box plot</option></select><select id="chart-x"></select><select id="chart-y"></select><button id="chart-btn" class="button button-dark">Create chart</button></div></div><div id="chart-area" class="chart-area"><div class="chart-placeholder">Select columns and create a chart to explore your data.</div></div></article>
+      <article class="card wide"><div class="card-head"><div><span class="card-kicker">STATISTICAL ANALYSIS</span><h2>Key relationships</h2></div><div class="chart-controls"><span class="muted small">Pearson correlation · numeric columns</span><button id="anomaly-btn" class="button button-light">Find unusual rows</button></div></div><div id="correlation-list" class="correlation-list"></div><div id="anomaly-result" class="clean-result hidden"></div></article>
+      <article class="card wide assistant-card"><div class="card-head"><div><span class="card-kicker">ASK YOUR DATA</span><h2>What would you like to know?</h2></div><span class="spark">✧</span></div><div class="ask-row"><input id="question" type="text" placeholder="e.g. Which columns have the strongest relationship?" maxlength="1000"><button id="ask-btn" class="button button-dark">Ask InsightForge <span>↗</span></button></div><div id="answer" class="answer hidden"></div><div class="suggestions"><button>What stands out in this dataset?</button><button>Show me the strongest correlations</button><button>What are the most common values?</button></div></article>
+    </div>
+  </section>
+</main>
+<div id="toast" class="toast hidden"></div>
+<script src="/static/app.js"></script>
+</body></html>
